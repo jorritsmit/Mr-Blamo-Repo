@@ -6,7 +6,9 @@
         <setting label="30303" type="action" action="RunPlugin(plugin://plugin.video.chappaai/update_library)" visible="eq(-1,true)" />
         <setting label="30305" type="bool" id="library_set_date" default="false"/>
         <setting label="30902" id="library_sync_collection" type="bool" default="false" />
+        <setting label="30905" id="library_sync_collection_twoway" type="bool" default="false" visible="eq(-1,true)"/>
         <setting label="30903" id="library_sync_watchlist" type="bool" default="false" />
+        <setting label="30904" id="library_sync_watchlist_twoway" type="bool" default="false" visible="eq(-1,true)"/>
         <setting label="Library update interval" id="update_library_interval" type="slider" range="4,4,48" default="8" option="int" />
         <setting label="Include episode with unknown air-date?" id="aired_unknown" type="bool" default="false"/>
         <setting label="Add tags to filenames" id="library_tags" type="text" default="" />

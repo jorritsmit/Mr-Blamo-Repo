@@ -10,12 +10,13 @@ import re
 import sqlite3
 import xbmcgui
 import xbmc
+import time
 
 from xbmcswift2 import xbmc, xbmcvfs
 from meta import plugin
 from meta.play.players import patch
 from meta.video_player import VideoPlayer
-from meta.utils.properties import get_property, clear_property
+from meta.utils.properties import get_property, clear_property, set_property
 from lastfm import lastfm
 from default import update_library
 from settings import SETTING_UPDATE_LIBRARY_INTERVAL, SETTING_MUSIC_LIBRARY_FOLDER, SETTING_TOTAL_SETUP_DONE, SETTING_AUTOPATCH
@@ -211,6 +212,10 @@ def future(seconds):
     return datetime.datetime.now() + datetime.timedelta(seconds=seconds)
 
 def main():
+    set_property("syncing_library", int((time.time() - plugin.get_setting(SETTING_UPDATE_LIBRARY_INTERVAL, int) * 60)))
+    set_property("updating_library", int((time.time() - plugin.get_setting(SETTING_UPDATE_LIBRARY_INTERVAL, int) * 60)))
+    set_property("updating_library_music", int((time.time() - plugin.get_setting(SETTING_UPDATE_LIBRARY_INTERVAL, int) * 60)))
+
     go_idle(15)
     if plugin.get_setting(SETTING_TOTAL_SETUP_DONE, bool) == False:
         xbmc.executebuiltin('RunPlugin(plugin://plugin.video.chappaai/setup/total)')

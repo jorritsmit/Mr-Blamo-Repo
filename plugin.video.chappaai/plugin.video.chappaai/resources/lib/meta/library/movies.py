@@ -1,6 +1,8 @@
 import os
 import json
 import urllib
+import time
+import shutil
 
 from xbmcswift2 import xbmc, xbmcvfs
 
@@ -10,6 +12,7 @@ from meta.library.tools import scan_library, add_source
 from meta.utils.rpc import RPC
 from meta.gui import dialogs
 from meta.navigation.base import get_icon_path, get_background_path
+from meta.utils.properties import get_property, set_property, clear_property
 
 from language import get_string as _
 from settings import SETTING_MOVIES_LIBRARY_FOLDER, SETTING_MOVIES_PLAYLIST_FOLDER, SETTING_LIBRARY_TAGS, SETTING_MOVIES_DEFAULT_PLAYER_FROM_LIBRARY
@@ -24,15 +27,69 @@ def update_library():
     library_folder = plugin.get_setting(SETTING_MOVIES_LIBRARY_FOLDER, unicode)
     if not xbmcvfs.exists(library_folder):
         return
-    scan_library(type="video")
+    if int(time.time()) - int(get_property("updating_library")) < plugin.get_setting(SETTING_UPDATE_LIBRARY_INTERVAL, int) * 60:
+        scan_library(type="video")
+        set_property("updating_library", int(time.time()))
 
 def sync_trakt_collection():
     from meta.navigation.movies import trakt_movies_collection_to_library
     trakt_movies_collection_to_library(True, True)
 
+def sync_trakt_collection_del():
+    from trakt import trakt
+    library_folder = setup_library(plugin.get_setting(SETTING_MOVIES_LIBRARY_FOLDER, unicode))
+    shows = xbmcvfs.listdir(library_folder)[0]
+    items = trakt.trakt_get_collection("movies")
+
+    # Convert watchlist items to ids list
+    if "results" in items: 
+        ids = [str(r["id"]) for r in items["results"]]
+    else:
+        vals = [i["movie"]["ids"]["imdb"] if i["movie"]["ids"]["imdb"] != None and i["movie"]["ids"]["imdb"] != "" else i["movie"]["ids"]["tmdb"] for i in items] 
+        ids = [str(ii) for ii in vals]
+
+    # Make list of local shows not in watchlist
+    del_list = [x for x in shows if x not in ids]
+    plugin.log.debug("del_list_movie: " + str(del_list))
+    if del_list:
+        remove_unlisted_movie(del_list)
+
 def sync_trakt_watchlist():
     from meta.navigation.movies import trakt_movies_watchlist_to_library
     trakt_movies_watchlist_to_library(True, True)
+
+def sync_trakt_watchlist_del():
+    from trakt import trakt
+    library_folder = setup_library(plugin.get_setting(SETTING_MOVIES_LIBRARY_FOLDER, unicode))
+    shows = xbmcvfs.listdir(library_folder)[0]
+    items = trakt.trakt_get_watchlist("movies")
+
+    # Convert watchlist items to ids list
+    if "results" in items: 
+        ids = [str(r["id"]) for r in items["results"]]
+    else:
+        vals = [i["movie"]["ids"]["imdb"] if i["movie"]["ids"]["imdb"] != None and i["movie"]["ids"]["imdb"] != "" else i["movie"]["ids"]["tmdb"] for i in items] 
+        ids = [str(ii) for ii in vals]
+
+    ## Make list of local shows not in watchlist
+    del_list = [x for x in shows if x not in ids]
+    plugin.log.debug("del_list_movie: " + str(del_list))
+    if del_list:
+        remove_unlisted_movie(del_list)
+
+def remove_unlisted_movie(movie_delete_list):
+    msg_str = str(len(movie_delete_list)) + ' movies not in list'
+    dialogs.notify(msg=msg_str, title='Deleting unlisted movies' , delay=3000, image=get_icon_path("metalliq"))
+    # Remove unlisted movies and series
+    clean_needed = False
+    movies_library_folder = setup_library(plugin.get_setting(SETTING_MOVIES_LIBRARY_FOLDER, unicode))
+    for id in movie_delete_list:
+        movie_folder = os.path.join(movies_library_folder, str(id)+'/')
+        if os.path.exists(movie_folder):
+            shutil.rmtree(movie_folder)
+        clean_needed = True
+    if clean_needed:
+        set_property("clean_library", 1)
 
 def add_movie_to_library(library_folder, src, id, play_plugin=None):
     changed = False
@@ -75,7 +132,7 @@ def add_movie_to_library(library_folder, src, id, play_plugin=None):
     return changed
 
 def batch_add_movies_to_library(library_folder, id):
-    if id == None:
+    if id == None or id == "":
         return
     changed = False
     movie_folder = os.path.join(library_folder, str(id)+'/')

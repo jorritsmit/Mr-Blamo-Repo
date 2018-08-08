@@ -1,6 +1,7 @@
 import os
 import shutil
 import requests
+import time
  
 from xbmcswift2 import xbmc, xbmcvfs
 
@@ -8,11 +9,12 @@ from meta import plugin
 from meta.gui import dialogs
 from meta.utils.text import to_utf8
 from meta.library.tools import scan_library, add_source
+from meta.utils.properties import set_property, get_property
 from meta.navigation.base import get_icon_path, get_background_path
 from lastfm import lastfm
 
 from language import get_string as _
-from settings import SETTING_MUSIC_LIBRARY_FOLDER, SETTING_MUSIC_PLAYLIST_FOLDER
+from settings import SETTING_MUSIC_LIBRARY_FOLDER, SETTING_MUSIC_PLAYLIST_FOLDER, SETTING_UPDATE_LIBRARY_INTERVAL
 
 import re
 
@@ -21,8 +23,11 @@ def update_library():
     library_folder = plugin.get_setting(SETTING_MUSIC_LIBRARY_FOLDER, unicode)
     if not xbmcvfs.exists(library_folder):
         return
-    scan_library(type="music")
-    #scan_library(type="video")
+    # scan_library(type="music")
+    # scan_library(type="video")
+    if int(time.time()) - int(get_property("updating_library_music")) < plugin.get_setting(SETTING_UPDATE_LIBRARY_INTERVAL, int) * 60:
+        scan_library(type="music")
+        set_property("updating_library_music", int(time.time()))
 
 def add_music_to_library(library_folder, artist_name, album_name, track_name):
     # replace non valid path characters with _

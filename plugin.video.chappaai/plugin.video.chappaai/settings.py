@@ -1,26 +1,14 @@
-#! /usr/bin/python
-CACHE_TTL = 60
-#UPDATE_LIBRARY_INTERVAL = 4*60*60
-
-if __name__ == "__main__":
-    import xml.etree.ElementTree as ET
-    tree = ET.parse('resources/settings.xml')
-    ids = filter(None, [item.get('id') for item in tree.findall('.//setting')])
-    content = []
-    with open(__file__, "r") as me:
-        content = me.readlines()
-        content = content[:content.index("#GENERATED\n")+1]
-    with open(__file__, 'w') as f:
-        f.writelines(content)
-        for _id in ids:
-            line = "SETTING_{0} = \"{1}\"\n".format(_id.upper(), _id)
-            f.write(line)    
-
-#GENERATED
-SETTING_LIBRARY_UPDATES = "library_updates"
+#! /usr/bin/pythonCACHE_TTL = 60#UPDATE_LIBRARY_INTERVAL = 4*60*60if __name__ == "__main__":    import xml.etree.ElementTree as ET    tree = ET.parse('resources/settings.xml')    ids = filter(None, [item.get('id') for item in tree.findall('.//setting')])    content = []    with open(__file__, "r") as me:        content = me.read().splitlines()        content = content[:content.index("#GENERATED")+1]    with open(__file__, 'w') as f:        f.writelines(content)        for _id in ids:            line = "SETTING_{0} = \"{1}\"\n".format(_id.upper(), _id)            f.write(line)    #GENERATEDSETTING_LIBRARY_UPDATES = "library_updates"
 SETTING_LIBRARY_SET_DATE = "library_set_date"
 SETTING_LIBRARY_SYNC_COLLECTION = "library_sync_collection"
+SETTING_LIBRARY_SYNC_COLLECTION_TWOWAY = "library_sync_collection_twoway"
 SETTING_LIBRARY_SYNC_WATCHLIST = "library_sync_watchlist"
+SETTING_LIBRARY_SYNC_WATCHLIST_TWOWAY = "library_sync_watchlist_twoway"
+SETTING_UPDATE_LIBRARY_INTERVAL = "update_library_interval"
+SETTING_AIRED_UNKNOWN = "aired_unknown"
+SETTING_LIBRARY_TAGS = "library_tags"
+SETTING_AIRDATE_OFFSET = "airdate_offset"
+SETTING_INCLUDE_SPECIALS = "include_specials"
 SETTING_TOTAL_SETUP_DONE = "total_setup_done"
 SETTING_PLAYERS_UPDATE_URL = "players_update_url"
 SETTING_TRAKT_ACCESS_TOKEN = "trakt_access_token"
@@ -64,20 +52,16 @@ SETTING_LIVE_DEFAULT_PLAYER_FROM_CONTEXT = "live_default_player_from_context"
 SETTING_LIVE_LIBRARY_FOLDER = "live_library_folder"
 SETTING_LIVE_PLAYLIST_FOLDER = "live_playlist_folder"
 SETTING_LIVE_DEFAULT_AUTO_ADD = "live_default_auto_add"
+SETTING_PREFERRED_TOGGLE = "preferred_toggle"
+SETTING_PRIMARY_SKIN = "primary_skin"
+SETTING_ALTERNATE_SKIN = "alternate_skin"
+SETTING_RANDOM_PAGES = "random_pages"
 SETTING_USE_SIMPLE_SELECTOR = "use_simple_selector"
 SETTING_AUTO_HIDE_DIALOGS = "auto_hide_dialogs"
 SETTING_AUTO_HIDE_DIALOGS_PROGRESS = "auto_hide_dialogs_progress"
 SETTING_AUTO_HIDE_DIALOGS_INFO = "auto_hide_dialogs_info"
 SETTING_AUTO_HIDE_DIALOGS_KEYBOARD = "auto_hide_dialogs_keyboard"
 SETTING_POOL_SIZE = "pool_size"
-SETTING_AIRED_UNKNOWN= "aired_unknown"
-SETTING_INCLUDE_SPECIALS = "include_specials"
-SETTING_TRAKT_LIST_ARTWORK = "trakt_list_artwork"
-SETTING_PREFERRED_TOGGLE = "preferred_toggle"
-SETTING_PRIMARY_SKIN = "primary_skin"
-SETTING_ALTERNATE_SKIN = "alternate_skin"
-SETTING_RANDOM_PAGES = "random_pages"
-SETTING_TRAKT_EXPIRES_AT = "trakt_expires_at"
 SETTING_STYLE = "style"
 SETTING_STYLE_CUSTOM_FOLDER = "style_custom_folder"
 SETTING_BACKGROUND = "background"
@@ -100,8 +84,13 @@ SETTING_TV_ENABLED_CHANNELERS = "tv_enabled_channelers"
 SETTING_TV_DEFAULT_CHANNELER = "tv_default_channeler"
 SETTING_LIVE_ENABLED_CHANNELERS = "live_enabled_channelers"
 SETTING_LIVE_DEFAULT_CHANNELER = "live_default_channeler"
-SETTING_UPDATE_LIBRARY_INTERVAL = "update_library_interval"
-SETTING_AIRDATE_OFFSET = "airdate_offset"
-SETTING_LIBRARY_TAGS = "library_tags"
+SETTING_LIBRARY_TITLES = "library_titles"
+SETTING_SYNC_FOLDER = "sync_folder"
 SETTING_AUTOPATCH = "autopatch"
 SETTING_AUTOPATCHES = "autopatches"
+SETTING_TRAKT_API_CLIENT_ID = "trakt_api_client_id"
+SETTING_TRAKT_API_CLIENT_SECRET = "trakt_api_client_secret"
+SETTING_TMDB_API = "tmdb_api"
+SETTING_TVDB_API = "tvdb_api"
+SETTING_LASTFM_API_KEY = "lastfm_api_key"
+SETTING_LASTFM_API_SHARED_SECRET = "lastfm_api_shared_secret"

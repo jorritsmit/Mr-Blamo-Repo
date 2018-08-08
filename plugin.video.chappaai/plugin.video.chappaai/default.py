@@ -103,7 +103,10 @@ def clear_cache():
             elif os.path.isdir(file_path):
                 shutil.rmtree(file_path)
         except Exception, e:
-            traceback.print_exc()
+            traceback.print_exc()  
+    set_property("syncing_library", int((time.time() - plugin.get_setting(SETTING_UPDATE_LIBRARY_INTERVAL, int) * 60)))
+    set_property("updating_library", int((time.time() - plugin.get_setting(SETTING_UPDATE_LIBRARY_INTERVAL, int) * 60)))
+    set_property("updating_library_music", int((time.time() - plugin.get_setting(SETTING_UPDATE_LIBRARY_INTERVAL, int) * 60)))
     dialogs.notify(msg='Cache', title='Deleted', delay=5000, image=get_icon_path("metalliq"))
 
 @plugin.route('/update_library')
@@ -121,14 +124,24 @@ def update_library():
                 if plugin.get_setting(SETTING_LIBRARY_SYNC_COLLECTION, bool) == True:
                     meta.library.tvshows.sync_trakt_collection()
                     meta.library.movies.sync_trakt_collection()
+                    if plugin.get_setting(SETTING_LIBRARY_SYNC_COLLECTION_TWOWAY, bool) == True:
+                        meta.library.tvshows.sync_trakt_collection_del()
+                        meta.library.movies.sync_trakt_collection_del()
                 if plugin.get_setting(SETTING_LIBRARY_SYNC_WATCHLIST, bool) == True:
                     meta.library.tvshows.sync_trakt_watchlist()
                     meta.library.movies.sync_trakt_watchlist()
-            except: plugin.log.info("something went wrong")
+                    if plugin.get_setting(SETTING_LIBRARY_SYNC_WATCHLIST_TWOWAY, bool) == True:
+                        meta.library.tvshows.sync_trakt_watchlist_del()
+                        meta.library.movies.sync_trakt_watchlist_del()
+
+            except Exception as e:
+                plugin.log.info(str(e))
+                plugin.log.info(str(sys.exc_info()[0]))
             finally: clear_property("syncing_library")
         else: clear_property("syncing_library")
-    if is_updating and now - int(is_updating) < 120:
-        plugin.log.debug("Skipping library update")
+    # plugin.log.info("up: " + str(is_updating) + " now: " + str(now - int(is_updating)))
+    if is_updating and now - int(is_updating) < plugin.get_setting(SETTING_UPDATE_LIBRARY_INTERVAL, int) * 60:
+        plugin.log.info("Skipping library update")
         return
     if plugin.get_setting(SETTING_LIBRARY_UPDATES, bool) == True:
         try:

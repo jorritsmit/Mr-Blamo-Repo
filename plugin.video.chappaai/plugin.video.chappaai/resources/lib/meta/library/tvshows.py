@@ -1,19 +1,20 @@
 import os
 import shutil
+import time
 
 from xbmcswift2 import xbmc, xbmcvfs
 
 from meta import plugin, import_tvdb, LANG
 from meta.utils.text import to_utf8, date_to_timestamp, equals
 from meta.utils.rpc import RPC
-from meta.utils.properties import set_property
+from meta.utils.properties import set_property, get_property
 from meta.library.tools import scan_library, add_source
 from meta.gui import dialogs
 from meta.navigation.base import get_icon_path, get_background_path
 
 from language import get_string as _
 from settings import SETTING_TV_LIBRARY_FOLDER, SETTING_LIBRARY_SET_DATE, SETTING_TV_PLAYLIST_FOLDER, SETTING_AIRED_UNKNOWN, SETTING_LIBRARY_TAGS, SETTING_INCLUDE_SPECIALS, SETTING_TV_DEFAULT_PLAYER_FROM_LIBRARY
-
+from settings import SETTING_UPDATE_LIBRARY_INTERVAL
 def update_library():
     import_tvdb()
     folder_path = plugin.get_setting(SETTING_TV_LIBRARY_FOLDER, unicode)
@@ -40,7 +41,9 @@ def update_library():
         set_property("clean_library", 1)
     # start scan
     if updated > 0:
-        scan_library(type="video")
+        if int(time.time()) - int(get_property("updating_library")) < plugin.get_setting(SETTING_UPDATE_LIBRARY_INTERVAL, int) * 60:
+            scan_library(type="video")
+            set_property("updating_library", int(time.time()))
 
 def sync_trakt_collection():
     from meta.navigation.tvshows import trakt_tv_collection_to_library
